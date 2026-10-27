@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""Build two editable 64x64 character sprites and indexed LVGL resources."""
+from pathlib import Path
+from PIL import Image, ImageDraw
+
+ROOT = Path(__file__).resolve().parents[1]
+APP = ROOT / 'examples/arduino/08_OrbitClock'
+PALETTE = ['#34333B', '#A9ACBB', '#BFC2D0', '#30262A', '#201A1D', '#DBAE5F',
+           '#EED796', '#CD954A', '#B95E50', '#D77D68', '#8C1B24', '#EAE8DC',
+           '#51332D', '#9A9398', '#A26E3C', '#F1F3F4']
+CLASSIC_PALETTE = ['#34333B', '#A9ACBB', '#BFC2D0', '#23364B', '#2D3944', '#EAD26A',
+                   '#F4DC78', '#D5BF63', '#C85C60', '#CF6D63', '#B64E56', '#F4F3EC',
+                   '#653F37', '#56414B', '#4A4B51', '#F1F3F4']
+
+def restore_classic_face(art):
+    """Optically redraw fine features that disappear when the source grid shrinks."""
+    ink=(*bytes.fromhex(CLASSIC_PALETTE[3][1:]),255)
+    gold=(*bytes.fromhex(CLASSIC_PALETTE[6][1:]),255)
+    white=(*bytes.fromhex(CLASSIC_PALETTE[15][1:]),255)
+    # Remove the three surviving mouth tiles before tracing the complete curve.
+    for point in [(25,36),(26,37),(27,37)]:art.putpixel(point,gold)
+    # A small triangular nose; nearest-neighbor sampling lost all four source tiles.
+    for point in [(22,33),(23,33),(23,34)]:art.putpixel(point,ink)
+    # The reference's pout rises on the left, then steps down to the right.
+    # Keep the full path, with a clear yellow row between nose and mouth.
+    for point in [(22,37),(23,36),(24,36),(25,37),(26,37),(27,38)]:
+        art.putpixel(point,ink)
+    # Restore the right eye's square highlight instead of a thin horizontal dash.
+    for point in [(32,30),(33,30),(32,31),(33,31)]:art.putpixel(point,white)
+
+def character(classic=False):
+    """Read the editable reference-grid drawing, then fit it without stretching."""
+    name = 'retro_character_classic.pixels' if classic else 'retro_character.pixels'
+    palette = CLASSIC_PALETTE if classic else PALETTE
+    width,height = (101,104) if classic else (57,61)
+    rows = [line.strip() for line in (APP/name).read_text().splitlines()
+            if line.strip() and not line.startswith('#')]
+    assert len(rows)==height and all(len(row)==width for row in rows)
+    original=Image.new('RGBA',(width,height),(0,0,0,0))
+    for y,row in enumerate(rows):
+        for x,tile in enumerate(row):
+            if tile!='.':original.putpixel((x,y),(*bytes.fromhex(palette[int(tile,16)][1:]),255))
+    art=Image.new('RGBA',(64,64),(0,0,0,0))
+    if classic:
+        # This denser design is fitted once offline, never interpolated on the board.
+        art.paste(original.resize((61,63),Image.Resampling.NEAREST),(1,0))
+        restore_classic_face(art)
+    else:
+        # Keep every tile in the coarser hooded design, including its eye highlights.
+        art.paste(original,(3,1))
+    return art
+
+def nearest(rgb,palette):
+    colors=[tuple(bytes.fromhex(h[1:])) for h in palette]
+    return min(range(len(colors)),key=lambda i:sum((rgb[j]-colors[i][j])**2 for j in range(3)))
+
+def matrix(width,height,art=None,palette=PALETTE):
+    image=Image.new('P',(width,height),0)
+    pal=[v for h in palette for v in bytes.fromhex(h[1:])]
+    image.putpalette(pal+[0]*(768-len(pal)))
+    draw=ImageDraw.Draw(image)
+    for row in range(height//5):
+        for column in range(width//5):
+            index=1
+            if art is not None:
+                rgba=art.getpixel((column,row))
+                if rgba[3]>127:index=nearest(rgba[:3],palette)
+            x=column*5+1;y=row*5+1
+            # One regular LED element per logical pixel; the gaps remain visible.
+            draw.rounded_rectangle((x,y,x+3,y+3),radius=0,fill=index)
+
+    return image
+
+def encode(name,img,palette=PALETTE):
+    width,height=img.size
+    data=[]
+    for h in palette:
+        r,g,b=bytes.fromhex(h[1:]);data.extend([b,g,r,255])
+    pixels=img.tobytes()
+    assert len(pixels)%2==0 and max(pixels)<16
+    data.extend((pixels[i]<<4)|pixels[i+1] for i in range(0,len(pixels),2))
+    lines=[f'const uint8_t {name}_data[] = {{']
+    for i in range(0,len(data),24):lines.append('  '+','.join(f'0x{x:02x}' for x in data[i:i+24])+',')
+    lines += ['};',f'const lv_img_dsc_t {name} = {{',
+              f'  .header = {{.cf=LV_IMG_CF_INDEXED_4BIT,.always_zero=0,.reserved=0,.w={width},.h={height}}},',
+              f'  .data_size=sizeof({name}_data),.data={name}_data', '};']
+    return '\n'.join(lines)
+
+def main():
+    art=character();art.save(APP/'retro_character.png')
+    classic=character(True);classic.save(APP/'retro_character_classic.png')
+    backdrop=matrix(480,480);sprite=matrix(320,320,art)
+    alternate=matrix(320,320,classic,CLASSIC_PALETTE)
+    (APP/'retro_assets.h').write_text('#pragma once\n#include <lvgl.h>\n#ifdef __cplusplus\nextern "C" {\n#endif\n'
+        'LV_IMG_DECLARE(retro_matrix);\nLV_IMG_DECLARE(retro_character);\n'
+        'LV_IMG_DECLARE(retro_character_classic);\n#ifdef __cplusplus\n}\n#endif\n')
+    (APP/'retro_assets.c').write_text('// Generated by scripts/generate_retro_assets.py.\n#include "retro_assets.h"\n'
+        +encode('retro_matrix',backdrop)+'\n'+encode('retro_character',sprite)+'\n'
+        +encode('retro_character_classic',alternate,CLASSIC_PALETTE)+'\n')
+    art.resize((640,640),Image.Resampling.NEAREST).save(ROOT.parent/'outputs/RetroClock-角色像素稿.png')
+    classic.resize((640,640),Image.Resampling.NEAREST).save(ROOT.parent/'outputs/RetroClock-点击角色像素稿.png')
+    print('Generated indexed 4-bit background and two 64x64 logical character sprites')
+
+if __name__=='__main__':main()

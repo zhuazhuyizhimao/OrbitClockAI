@@ -1,0 +1,83 @@
+{
+  "folders": [
+    {
+      "path": "../ESP32-S3-Touch-AMOLED-2.16"
+    }
+  ],
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "小智合并版：编译",
+        "type": "process",
+        "command": "python3",
+        "windows": {
+          "command": "python"
+        },
+        "args": [
+          "${workspaceFolder}/scripts/orbit_ai.py",
+          "build"
+        ],
+        "problemMatcher": [
+          "$gcc"
+        ],
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+        }
+      },
+      {
+        "label": "小智合并版：烧录并校时（先备份）",
+        "type": "process",
+        "command": "python3",
+        "windows": {
+          "command": "python"
+        },
+        "args": [
+          "${workspaceFolder}/scripts/orbit_ai.py",
+          "flash"
+        ],
+        "problemMatcher": [],
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+        }
+      },
+      {
+        "label": "小智合并版：直接烧录并校时（不备份）",
+        "type": "process",
+        "command": "python3",
+        "windows": {
+          "command": "python"
+        },
+        "args": [
+          "${workspaceFolder}/scripts/orbit_ai.py",
+          "flash",
+          "--skip-backup"
+        ],
+        "problemMatcher": [],
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+        }
+      },
+      {
+        "label": "小智合并版：仅 USB 校时",
+        "type": "process",
+        "command": "python3",
+        "windows": {
+          "command": "python"
+        },
+        "args": [
+          "${workspaceFolder}/scripts/orbit_ai.py",
+          "sync"
+        ],
+        "problemMatcher": [],
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+        }
+      }
+    ]
+  }
+}

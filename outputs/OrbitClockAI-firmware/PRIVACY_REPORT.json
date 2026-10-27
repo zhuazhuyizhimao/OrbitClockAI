@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "scope": "five firmware images and public notices",
+  "personal_paths": 0,
+  "device_backups": 0,
+  "nvs_images": 0,
+  "credentials_files": 0,
+  "method": "binary path scan, credential-file exclusion, partition-range validation"
+}

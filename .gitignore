@@ -1,0 +1,17 @@
+work/
+**/build/
+**/managed_components/
+**/__pycache__/
+**/.venv/
+**/clock_secrets.h
+**/.env
+**/.env.*
+*.py[cod]
+*.elf
+*.map
+*.partial
+*.parts/
+**/board-backups/
+.DS_Store
+.vscode/
+.idea/

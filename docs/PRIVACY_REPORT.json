@@ -1,0 +1,10 @@
+{
+  "files_scanned": 406,
+  "findings": [],
+  "passed": true,
+  "scope": "all release files before this report and root checksum file",
+  "firmware_partition_validation": "passed; NVS range excluded",
+  "build_path_removal": "compiler -ffile-prefix-map; no binary patching",
+  "device_backups_included": false,
+  "wifi_configuration_included": false
+}

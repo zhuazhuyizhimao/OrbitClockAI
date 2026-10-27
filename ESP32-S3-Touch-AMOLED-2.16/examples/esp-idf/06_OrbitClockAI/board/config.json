@@ -1,0 +1,33 @@
+{
+  "type": "orbit-clock-ai",
+  "target": "esp32s3",
+  "builds": [
+    {
+      "name": "orbit-clock-ai",
+      "sdkconfig_append": [
+        "CONFIG_BOARD_TYPE_ORBIT_CLOCK_AI=y",
+        "CONFIG_USE_DEVICE_AEC=n",
+        "CONFIG_USE_WECHAT_MESSAGE_STYLE=n",
+        "CONFIG_LV_FONT_MONTSERRAT_16=y",
+        "CONFIG_LV_FONT_MONTSERRAT_20=y",
+        "CONFIG_LV_FONT_MONTSERRAT_32=y",
+        "CONFIG_LV_FONT_MONTSERRAT_48=y",
+        "CONFIG_LV_USE_BAR=y",
+        "CONFIG_LV_USE_IMAGE=y",
+        "CONFIG_LV_USE_LABEL=y",
+        "CONFIG_LV_USE_BUTTON=y",
+        "CONFIG_LV_USE_CANVAS=y",
+        "CONFIG_LV_USE_FONT_COMPRESSED=n",
+        "CONFIG_LV_FONT_FMT_TXT_LARGE=y",
+        "CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y",
+        "CONFIG_ESP_CONSOLE_SECONDARY_NONE=y",
+        "CONFIG_PARTITION_TABLE_CUSTOM=y",
+        "CONFIG_PARTITION_TABLE_CUSTOM_FILENAME=\"main/boards/orbit-clock-ai/partitions.csv\"",
+        "CONFIG_USE_DEFAULT_MESSAGE_STYLE=y",
+        "CONFIG_OTA_ALLOW_FIRMWARE_UPGRADE=n",
+        "CONFIG_OTA_APPLY_TIMEZONE_OFFSET=n",
+        "CONFIG_LWIP_SNTP_MAX_SERVERS=3"
+      ]
+    }
+  ]
+}

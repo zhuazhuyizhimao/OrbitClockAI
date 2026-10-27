@@ -1,0 +1,37 @@
+{
+  "format": 1,
+  "board": "orbit-clock-ai",
+  "xiaozhi_revision": "49b4380b3faa0ceadd28a3e78aaf0f311c46c57e",
+  "files": [
+    {
+      "offset": "0x0",
+      "name": "bootloader.bin",
+      "size": 16672,
+      "sha256": "9644a904f0ab708d789f2c7fbbb085b3f105a841af8695227ff894d2c7e348f9"
+    },
+    {
+      "offset": "0x8000",
+      "name": "partition-table.bin",
+      "size": 3072,
+      "sha256": "34043c294edada4b3a7603ee9a0457b19b16900c55d6f93a2612b4e24cfa15c4"
+    },
+    {
+      "offset": "0xe000",
+      "name": "ota_data_initial.bin",
+      "size": 8192,
+      "sha256": "7d2c7ac4888bfd75cd5f56e8d61f69595121183afc81556c876732fd3782c62f"
+    },
+    {
+      "offset": "0x20000",
+      "name": "orbit-clock-ai.bin",
+      "size": 3289840,
+      "sha256": "5e15af1ef5a45a141c3ce1a54ffdfecfb57e3524bbddb52066110b046d69d24e"
+    },
+    {
+      "offset": "0x800000",
+      "name": "assets.bin",
+      "size": 2125180,
+      "sha256": "7cb938249a90dba798347b0815b1d85944a39ae46eaffe43cbd349b968c39258"
+    }
+  ]
+}
